@@ -1,0 +1,48 @@
+#VRML_SIM R2020a utf8
+WorldInfo {
+  info [
+    "Simulation of the Robocup Standard Platform League"
+    "Authors: Olivier Michel, Yvan Bourquin, Fabien Rohrer"
+    "Webpage: http://www.robotstadium.org"
+  ]
+  title "MRL-HSL"
+}
+Viewpoint {
+  orientation 0.5944835691428931 0.7716713796844156 0.22608088772622403 5.367405067143313
+  position -4.37402882129066 4.082316308182922 4.081911064045519
+  follow "Yellow"
+}
+Background {
+}
+DirectionalLight {
+  ambientIntensity 1
+  direction -0.5 -2 -0.5
+  intensity 0.3
+  castShadows TRUE
+}
+DirectionalLight {
+  ambientIntensity 1
+  direction 0.5 -0.5 0.5
+  intensity 0.5
+}
+DEF YELLOW_GOAL KidGoal {
+  translation 4.5 0 0
+  name "Yellow"
+}
+DEF BLUE_GOAL KidGoal {
+  translation -4.5 0 0
+  rotation 0 1 0 3.14159
+  name "Blue"
+}
+KidSoccerField {
+}
+Walls {
+}
+DEF BALL BallGPS {
+  translation 0 0.0699136720000042 0
+  radius 0.07
+  controller "void"
+}
+Darwin-op {
+  translation -1.86832 0.45 -2.03752
+}
