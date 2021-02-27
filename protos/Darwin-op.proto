@@ -3,7 +3,7 @@ PROTO Darwin-op [
     field SFRotation rotation            0 1 0 0
     field SFString   name                "DARwIn-OP"                      # Is `Solid.name`.
     field SFString   controller          "void"
-    field SFString   controllerArgs      ""
+    field MFString   controllerArgs      []
     # field SFString   contactMaterial     ""                             # Defines the `Solid.contactMaterial` for all the robot parts, except the feet and the hands.
     # field SFString   footContactMaterial ""                             # Defines the `Solid.contactMaterial` for the feet.
     # field SFString   handContactMaterial ""                             # Defines the `Solid.contactMaterial` for the hands.

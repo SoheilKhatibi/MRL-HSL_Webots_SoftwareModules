@@ -16,7 +16,7 @@ PROTO BallGPS [
   field SFFloat angularDamping 0.33
   field SFString contactMaterial "default"
   field SFString controller "ballGPS"
-  field SFString controllerArgs ""
+  field MFString controllerArgs ""
   field SFInt32  channel 0
 ]
 {
