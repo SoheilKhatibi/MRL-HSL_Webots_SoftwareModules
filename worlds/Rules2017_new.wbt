@@ -1,4 +1,4 @@
-#VRML_SIM R2020a utf8
+#VRML_SIM R2021a utf8
 WorldInfo {
   info [
     "Simulation of the Robocup Standard Platform League"
@@ -45,4 +45,6 @@ DEF BALL BallGPS {
 }
 Darwin-op {
   translation -1.86832 0.45 -2.03752
+  cameraWidth 640
+  cameraHeight 480
 }
