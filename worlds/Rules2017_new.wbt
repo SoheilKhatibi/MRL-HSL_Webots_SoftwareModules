@@ -6,6 +6,7 @@ WorldInfo {
     "Webpage: http://www.robotstadium.org"
   ]
   title "MRL-HSL"
+  coordinateSystem "NUE"
 }
 Viewpoint {
   orientation 0.5944835691428931 0.7716713796844156 0.22608088772622403 5.367405067143313
