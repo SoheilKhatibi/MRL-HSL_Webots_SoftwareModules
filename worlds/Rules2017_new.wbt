@@ -46,6 +46,7 @@ DEF BALL BallGPS {
 }
 Darwin-op {
   translation -1.86832 0.45 -2.03752
+  controller "<extern>"
   cameraWidth 640
   cameraHeight 480
 }
