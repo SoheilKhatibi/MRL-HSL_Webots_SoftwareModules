@@ -204,7 +204,7 @@ PROTO Darwin-op [
             DEF DPelvYL HingeJoint {
                 jointParameters HingeJointParameters {
                     axis 0 1 0
-                    anchor 0.037 -0.1222 -0.005
+                    anchor 0.0507 -0.1557 -0.01556
                     position 0
                     dampingConstant 0.002
                     staticFriction 0.025
@@ -543,7 +543,7 @@ PROTO Darwin-op [
             DEF DPelvYR HingeJoint {
                 jointParameters HingeJointParameters {
                     axis 0 1 0
-                    anchor -0.037 -0.1222 -0.005
+                    anchor -0.0507 -0.1557 -0.01556
                     position 0
                     dampingConstant 0.002
                     staticFriction 0.025
