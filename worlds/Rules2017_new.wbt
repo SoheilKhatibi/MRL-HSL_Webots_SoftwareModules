@@ -1,4 +1,4 @@
-#VRML_SIM R2020a utf8
+#VRML_SIM R2021a utf8
 WorldInfo {
   info [
     "Simulation of the Robocup Standard Platform League"
@@ -6,6 +6,7 @@ WorldInfo {
     "Webpage: http://www.robotstadium.org"
   ]
   title "MRL-HSL"
+  coordinateSystem "NUE"
 }
 Viewpoint {
   orientation 0.5944835691428931 0.7716713796844156 0.22608088772622403 5.367405067143313
@@ -45,4 +46,7 @@ DEF BALL BallGPS {
 }
 Darwin-op {
   translation -1.86832 0.45 -2.03752
+  controller "<extern>"
+  cameraWidth 640
+  cameraHeight 480
 }
