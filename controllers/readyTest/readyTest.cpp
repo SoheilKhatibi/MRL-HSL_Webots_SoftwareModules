@@ -38,6 +38,10 @@ webots::Gyro *gyro;
 webots::Motor *mMotors[NMOTORS];
 Keyboard *keyboard;
 
+Node *Ashkan;
+Field *AshkanTranslation;
+Field *AshkanRotation;
+
 std::vector<int> moveDir(NMOTORS, 0);
 std::vector<int> jointReverse;
 
@@ -236,6 +240,17 @@ std::vector<double> uTorsoActual(3, 0);
 // ----------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//////////////////// Model ////////////////////
+std::vector<double> robotPose(3, 0);
+//////////////////// Model ////////////////////
+
+//////////////////// Game ////////////////////
+int gamePhase;
+std::vector<double> homePose(3, 0);
+double maxStep;
+std::vector<double> thClose(2, 0);
+//////////////////// Game ////////////////////
+
 void set_actuator_command(std::vector<double> a, int index) {
     for (int i = 0; i < int(a.size()); i++) {
         // actuator.command[index+i-1] = moveDir[index+i-1]*(a[i]+jointBias[index+i-1]);
@@ -265,7 +280,7 @@ double mod_angle(double a) {
         return NULL;
     }
     // Reduce angle to [-pi, pi)
-    a = fmod(a, 2 * M_PI);
+    a = remainder(a, 2 * M_PI);
     if (a >= M_PI) {
         a = a - 2 * M_PI;
     }
@@ -781,6 +796,101 @@ void UpdateKeyboard(){
     // std::cout<<key<<std::endl;
 }
 
+void entryGame() {
+    maxStep = 0.06;
+    gamePhase = 1;
+    thClose = {0.03, 3 * M_PI / 180};
+    homePose = {-4, -3, -M_PI/2};
+}
+
+std::vector<double> toEuler(double x,double y,double z,double angle) {
+	double heading, attitude, bank;
+    double s=sin(angle);
+	double c=cos(angle);
+	double t=1-c;
+	//  if axis is not already normalised then uncomment this
+	// double magnitude = Math.sqrt(x*x + y*y + z*z);
+	// if (magnitude==0) throw error;
+	// x /= magnitude;
+	// y /= magnitude;
+	// z /= magnitude;
+	// if ((x*y*t + z*s) > 0.998) { // north pole singularity detected
+	// 	heading = 2*atan2(x*sin(angle/2),cos(angle/2));
+	// 	attitude = M_PI/2;
+	// 	bank = 0;
+	// 	return;
+	// }
+	// if ((x*y*t + z*s) < -0.998) { // south pole singularity detected
+	// 	heading = -2*atan2(x*sin(angle/2),cos(angle/2));
+	// 	attitude = -M_PI/2;
+	// 	bank = 0;
+	// 	return;
+	// }
+	heading = atan2(y * s- x * z * t , 1 - (y*y+ z*z ) * t);
+	attitude = asin(x * y * t + z * s) ;
+	bank = atan2(x * s - y * z * t , 1 - (x*x + z*z) * t);
+    return {heading, attitude, bank};
+}
+
+void updateModel() {
+    const double *rot = AshkanRotation->getSFRotation();
+    const double *tra = AshkanTranslation->getSFVec3f();
+    // std::cout<<"tra: "<<tra[0]<<" "<<tra[1]<<" "<<tra[2]<<std::endl;
+    // std::cout<<"rot: "<<rot[0]<<" "<<rot[1]<<" "<<rot[2]<<" "<<rot[3]<<std::endl;
+    std::vector<double> out = toEuler(rot[0], rot[1], rot[2], rot[3]);
+    // std::cout<<"out: "<<out[0]*180/M_PI<<" "<<out[1]*180/M_PI<<" "<<out[2]*180/M_PI<<std::endl;
+    robotPose[0] = tra[0];
+    robotPose[1] = -tra[2];
+    robotPose[2] = mod_angle(out[0] - M_PI/2);
+    // std::cout<<"angles: "<<out[0]*180/M_PI<<" "<<(out[0] - M_PI/2)*180/M_PI<<" "<<mod_angle(out[0] - M_PI/2)*180/M_PI<<std::endl;
+    // std::cout<<"Pose: "<<robotPose[0]<<" "<<robotPose[1]<<" "<<robotPose[2]*180/M_PI<<std::endl;
+}
+
+void updateGame() {
+    if (gamePhase == 0) {
+        return;
+    }
+    std::vector<double> homeRelative = pose_relative(homePose, robotPose);
+    double rhome = sqrt(pow(homeRelative[0], 2) + pow(homeRelative[1], 2));
+
+    std::vector<double> v(3, 0);
+
+    if (gamePhase == 1) { // Approach phase
+        v[0] = maxStep * homeRelative[0] / rhome;
+        v[1] = maxStep * homeRelative[1] / rhome;
+        if ( abs(atan2(homeRelative[1], homeRelative[0])) > 20 * M_PI/180 ) {
+            v[0] = 0;
+            v[1] = 0;
+        }
+        v[2] = 0.2 * atan2(homeRelative[1], homeRelative[0]);
+        if (rhome < thClose[0]) {
+            gamePhase = 2;
+        }
+    } else if (gamePhase == 2) { // Turning phase, face center
+        v[0] = maxStep * homeRelative[0] / rhome;
+        v[1] = maxStep * homeRelative[1] / rhome;
+        v[2] = 0.2 * homeRelative[2];
+    }
+
+    set_velocity(v);
+
+    if ((gamePhase != 3) && (rhome < thClose[0]) && (abs(homeRelative[2]) < thClose[1])) {
+        stopWalk();
+        gamePhase = 3;
+    }
+
+    // To prevent robot keep walking after falling down
+    if (gamePhase == 3) {
+        stopWalk();
+    } else {
+        startWalk();
+    }
+
+    if ((gamePhase == 3) && (rhome > 0.3)) {
+        gamePhase = 1;
+    }
+}
+
 void updateWalk() {
     // advanceMotion();
     double t = getTime();
@@ -1278,11 +1388,13 @@ int main(int argc, char **argv) {
         // std::cout<<mMotors[i]->getMinPosition()<<std::endl;
     }
 
+    // entryModel();
+    entryGame();
     entryWalk();
     
-    // Node *Ashkan = robot->getFromDef("Ashkan");
-    // Field *AshkanTranslation = Ashkan->getField("translation");
-    // Field *AshkanRotation = Ashkan->getField("rotation");
+    Ashkan = robot->getFromDef("Ashkan");
+    AshkanTranslation = Ashkan->getField("translation");
+    AshkanRotation = Ashkan->getField("rotation");
     // const double tra[3] = {0, 1, 0};
     // const double rot[4] = {1, 0, 0, 0};
     while (robot->step(timeStep) != -1) {
@@ -1293,6 +1405,9 @@ int main(int argc, char **argv) {
         // Ashkan->resetPhysics();
         // robot->simulationResetPhysics();
         UpdateKeyboard();
+
+        updateModel();
+        updateGame();
         updateWalk();
     };
 

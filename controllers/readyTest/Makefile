@@ -39,7 +39,7 @@
 ###
 ### ---- C++ Sources ----
 ### if your program uses several C++ source files:
-CXX_SOURCES = luatables.cpp walk.cpp luaOPKinematics.cpp OPKinematics.cpp Transform.cpp
+CXX_SOURCES = luatables.cpp readyTest.cpp luaOPKinematics.cpp OPKinematics.cpp Transform.cpp
 ###
 ### ---- Compilation options ----
 ### if special compilation flags are necessary:
