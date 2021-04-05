@@ -1,4 +1,4 @@
-#VRML_SIM R2021a utf8
+#VRML_SIM R2021b utf8
 WorldInfo {
   info [
     "Simulation of the Robocup Standard Platform League"
@@ -9,8 +9,8 @@ WorldInfo {
   coordinateSystem "NUE"
 }
 Viewpoint {
-  orientation 0.5944835691428931 0.7716713796844156 0.22608088772622403 5.367405067143313
-  position -4.37402882129066 4.082316308182922 4.081911064045519
+  orientation -0.005813745973433208 0.9663736461787411 0.2570762072401129 3.0978907742434822
+  position 2.14853702680363 3.808907258230414 -8.243731067002356
   follow "Yellow"
 }
 Background {
@@ -40,13 +40,13 @@ KidSoccerField {
 Walls {
 }
 DEF BALL BallGPS {
-  translation 0 0.0699136720000042 0
+  translation 1.87349 0.0699137 1.91636
   radius 0.07
   controller "void"
 }
-Darwin-op {
-  translation -1.86832 0.45 -2.03752
-  controller "<extern>"
+DEF Ashkan Darwin-op {
+  translation 3 0.45 -3.2
+  controller "readyTest"
   cameraWidth 640
   cameraHeight 480
 }
