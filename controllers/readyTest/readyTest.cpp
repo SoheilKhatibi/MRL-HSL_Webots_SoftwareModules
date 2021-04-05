@@ -800,7 +800,6 @@ void entryGame() {
     maxStep = 0.06;
     gamePhase = 1;
     thClose = {0.03, 3 * M_PI / 180};
-    homePose = {-4, -3, -M_PI/2};
 }
 
 std::vector<double> toEuler(double x,double y,double z,double angle) {
@@ -1284,6 +1283,10 @@ int main(int argc, char **argv) {
     armImuParamY[1] = input["armImuParamY"][2].getDefault<double>(false);
     armImuParamY[2] = input["armImuParamY"][3].getDefault<double>(false);
     armImuParamY[3] = input["armImuParamY"][4].getDefault<double>(false);
+
+    homePose[0] = input["homePose"][1].getDefault<double>(false);
+    homePose[1] = input["homePose"][2].getDefault<double>(false);
+    homePose[2] = input["homePose"][3].getDefault<double>(false);
 
 
     uTorso = {supportX, 0, 0};

@@ -350,4 +350,6 @@ walk.motionDef["jableft"]={
 
 walk.walkKickSupportMod = {{0,0},{0,0}}
 
+walk.homePose = {-4, -3, -math.pi/2};
+
 return walk
