@@ -7,7 +7,7 @@ walk.stanceLimitX={-0.16,0.16};
 walk.stanceLimitY={0.07,0.20};
 walk.stanceLimitA={-10*math.pi/180,30*math.pi/180};
 walk.velLimitX={-.04,.08};
-walk.velLimitY={-.03,.03};
+walk.velLimitY={-.01,.01};
 walk.velLimitA={-.3,.3};
 walk.velDelta={0.02,0.02,0.15} 
 
@@ -28,7 +28,7 @@ walk.bodyTilt=20*math.pi/180;
 walk.footX= -0.035; 
 walk.footY = 0.05;
 walk.supportX = 0;
-walk.supportY = 0.025;
+walk.supportY = 0.015;
 --walk.qLArm=math.pi/180*vector.new({90,2,-40});
 --walk.qRArm=math.pi/180*vector.new({90,-2,-40});
 walk.qLArm={110*math.pi/180,2*math.pi/180,-40*math.pi/180};

@@ -45,6 +45,16 @@ Field *AshkanRotation;
 std::vector<int> moveDir(NMOTORS, 0);
 std::vector<int> jointReverse;
 
+struct EulerAngles
+{
+    double roll, pitch, yaw;
+};
+
+struct Quaternion
+{
+    double w, x, y, z;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // -- Walk Parameters
 // -- Stance and velocity limit values
@@ -250,6 +260,71 @@ std::vector<double> homePose(3, 0);
 double maxStep;
 std::vector<double> thClose(2, 0);
 //////////////////// Game ////////////////////
+
+void matrixFromAxisAngle(double x, double y, double z, double w, std::vector<std::vector<double>> &vect) {
+    vect = {
+        {0, 0, 0},
+        {0, 0, 0},
+        {0, 0, 0}
+    };
+    double c = cos(w);
+    double s = sin(w);
+    double t = 1.0 - c;
+	//  if axis is not already normalised then uncomment this
+	// double magnitude = Math.sqrt(a1.x*a1.x + a1.y*a1.y + a1.z*a1.z);
+	// if (magnitude==0) throw error;
+	// a1.x /= magnitude;
+	// a1.y /= magnitude;
+	// a1.z /= magnitude;
+
+    vect[0][0] = c + x*x*t;
+    vect[1][1] = c + y*y*t;
+    vect[2][2] = c + z*z*t;
+
+
+    double tmp1 = x*y*t;
+    double tmp2 = z*s;
+    vect[1][0] = tmp1 + tmp2;
+    vect[0][1] = tmp1 - tmp2;
+    tmp1 = x*z*t;
+    tmp2 = y*s;
+    vect[2][0] = tmp1 - tmp2;
+    vect[0][2] = tmp1 + tmp2;    
+    tmp1 = y*z*t;
+    tmp2 = x*s;
+    vect[2][1] = tmp1 + tmp2;
+    vect[1][2] = tmp1 - tmp2;
+}
+
+EulerAngles ToEulerAngles(Quaternion q)
+{
+    EulerAngles angles;
+
+    // roll (x-axis rotation)
+    double sinr_cosp = +2.0 * (q.w * q.x + q.y * q.z);
+    double cosr_cosp = +1.0 - 2.0 * (q.x * q.x + q.y * q.y);
+    angles.roll = atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    double sinp = +2.0 * (q.w * q.y - q.z * q.x);
+    if (fabs(sinp) >= 1)
+        angles.pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+    else
+        angles.pitch = asin(sinp);
+
+    // yaw (z-axis rotation)
+    double siny_cosp = +2.0 * (q.w * q.z + q.x * q.y);
+    double cosy_cosp = +1.0 - 2.0 * (q.y * q.y + q.z * q.z);
+    angles.yaw = atan2(siny_cosp, cosy_cosp);
+
+    return angles;
+}
+
+double quatToAngle(double x, double y, double z, double w) {
+    return 2*asin(std::sqrt(std::pow(x, 2) +
+                     std::pow(y, 2) +
+                     std::pow(z, 2))) * 180 / M_PI;
+}
 
 void set_actuator_command(std::vector<double> a, int index) {
     for (int i = 0; i < int(a.size()); i++) {
@@ -800,6 +875,7 @@ void entryGame() {
     maxStep = 0.06;
     gamePhase = 1;
     thClose = {0.03, 3 * M_PI / 180};
+    homePose = {-4, -3, -M_PI/2};
 }
 
 std::vector<double> toEuler(double x,double y,double z,double angle) {
@@ -836,11 +912,30 @@ void updateModel() {
     const double *tra = AshkanTranslation->getSFVec3f();
     // std::cout<<"tra: "<<tra[0]<<" "<<tra[1]<<" "<<tra[2]<<std::endl;
     // std::cout<<"rot: "<<rot[0]<<" "<<rot[1]<<" "<<rot[2]<<" "<<rot[3]<<std::endl;
-    std::vector<double> out = toEuler(rot[0], rot[1], rot[2], rot[3]);
-    // std::cout<<"out: "<<out[0]*180/M_PI<<" "<<out[1]*180/M_PI<<" "<<out[2]*180/M_PI<<std::endl;
+    std::vector<double> out = toEuler(-rot[2], rot[0], rot[1], rot[3]);
+
+    // Quaternion rotQ;
+    // rotQ.x = rot[0];
+    // rotQ.y = rot[1];
+    // rotQ.z = rot[2];
+    // rotQ.w = rot[3];
+    
+    // EulerAngles a = ToEulerAngles(rotQ);
+    std::vector<std::vector<double>> vect;
+    matrixFromAxisAngle(rot[0], rot[1], rot[2], rot[3], vect);
+
+    double beta = atan2(-vect[0][2], sqrt(pow(vect[0][0], 2) + pow(vect[1][0], 2)));
+    double alpha = atan2(vect[1][0]/cos(beta), vect[0][0]/cos(beta));
+    double gamma = atan2(vect[2][1]/cos(beta), vect[2][2]/cos(beta));
+
+    // std::cout<<"a: "<<beta*180/M_PI<<" "<<alpha*180/M_PI<<" "<<gamma*180/M_PI<<std::endl;
+
+    // std::cout<<"a: "<<a.roll*180/M_PI<<" "<<a.pitch*180/M_PI<<" "<<a.yaw*180/M_PI<<std::endl;
+
+    // std::cout<<"out: "<<out[0]*180/M_PI<<" "<<out[1]*180/M_PI<<" "<<-out[2]*180/M_PI<<std::endl;
     robotPose[0] = tra[0];
-    robotPose[1] = -tra[2];
-    robotPose[2] = mod_angle(out[0] - M_PI/2);
+    robotPose[1] = tra[1];
+    robotPose[2] = mod_angle(-out[2] - M_PI/2);
     // std::cout<<"angles: "<<out[0]*180/M_PI<<" "<<(out[0] - M_PI/2)*180/M_PI<<" "<<mod_angle(out[0] - M_PI/2)*180/M_PI<<std::endl;
     // std::cout<<"Pose: "<<robotPose[0]<<" "<<robotPose[1]<<" "<<robotPose[2]*180/M_PI<<std::endl;
 }
@@ -850,6 +945,11 @@ void updateGame() {
         return;
     }
     std::vector<double> homeRelative = pose_relative(homePose, robotPose);
+
+    // std::cout<<"robotPose: "<<robotPose[0]<<" "<<robotPose[1]<<" "<<robotPose[2]<<std::endl;
+    // std::cout<<"homePose: "<<homePose[0]<<" "<<homePose[1]<<" "<<homePose[2]<<std::endl;
+    // std::cout<<"homeRelative: "<<homeRelative[0]<<" "<<homeRelative[1]<<" "<<homeRelative[2]<<std::endl;
+    
     double rhome = sqrt(pow(homeRelative[0], 2) + pow(homeRelative[1], 2));
 
     std::vector<double> v(3, 0);
@@ -1283,10 +1383,6 @@ int main(int argc, char **argv) {
     armImuParamY[1] = input["armImuParamY"][2].getDefault<double>(false);
     armImuParamY[2] = input["armImuParamY"][3].getDefault<double>(false);
     armImuParamY[3] = input["armImuParamY"][4].getDefault<double>(false);
-
-    homePose[0] = input["homePose"][1].getDefault<double>(false);
-    homePose[1] = input["homePose"][2].getDefault<double>(false);
-    homePose[2] = input["homePose"][3].getDefault<double>(false);
 
 
     uTorso = {supportX, 0, 0};
