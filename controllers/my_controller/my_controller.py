@@ -86,7 +86,7 @@ while robot.step(timestep) != -1:
     tra = red1translation.getSFVec3f()
     rot = red1rotation.getSFRotation()
     euler = toEuler(rot[0], rot[1], rot[2], rot[3])
-    rotationout = rotate(euler[0], euler[1], euler[2])
+    rotationout = rotate(euler[0], math.pi-euler[1], euler[2])
     red2translation.setSFVec3f([-tra[0], tra[1], tra[2]])
     red2rotation.setSFRotation(rotationout)
     # print("tra:", tra)
