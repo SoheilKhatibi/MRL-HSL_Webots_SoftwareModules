@@ -34,8 +34,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.005891143931037353 -0.37149436569617755 -0.9284165178836375 3.1121491911579735
-  position 2.4295393775148906 9.766721929405783 8.092480065524605
+  orientation 0.997667874789332 -0.033059841046113383 -0.059714809916329166 1.013230000484456
+  position -0.4031116979425221 -7.704918761065835 5.7028862936341005
 }
 TexturedBackground {
   texture "stadium_dry"
@@ -43,17 +43,16 @@ TexturedBackground {
 TexturedBackgroundLight {
   texture "stadium_dry"
 }
-Robot {
-  controller ""
-  supervisor TRUE
-}
 RobocupSoccerField {
   size "kid"
 }
-RobocupSoccerBall {
-  translation 0 0 0.0785006
+DEF red1 Darwin-opHinge2 {
+  translation 1.72008 -0.367128 0.24
+  controller "my_controller"
+  supervisor TRUE
 }
-DEF Ashkan MRL-HSL {
-  translation 3 3.2 0.459395
-  controller "readyTest"
+DEF red2 Darwin-opHinge2 {
+  translation -1.46685 -0.200812 0.24
+  name "DARwIn-OP Hinge2(1)"
+  controller ""
 }
